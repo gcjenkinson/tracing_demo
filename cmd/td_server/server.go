@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"syscall"
 	"github.com/gcjenkinson/tracing_demo/chat"
+	"github.com/gcjenkinson/tracing_demo/dtrace"
 	"google.golang.org/grpc"
 	"golang.org/x/sync/errgroup"
 	opentracing "github.com/opentracing/opentracing-go"
@@ -56,7 +57,7 @@ func main() {
 	cfg.Sampler.Type = "const" 
 	cfg.Sampler.Param = 1
 		
-	dos, dosCloser, err := chat.NewDtraceObserver()
+	dos, dosCloser, err := dtrace.NewDtraceObserver()
 	defer dosCloser.Close()
 
 	tracer, closer, err:= cfg.NewTracer(
