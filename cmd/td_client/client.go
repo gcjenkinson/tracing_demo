@@ -64,7 +64,8 @@ func main() {
 	if err != nil {
 
 		logger.WithFields(log.Fields{"error": err.Error}).Error("Error when calling SayHello")
-	}
+	} else {
 
-	logger.WithFields(log.Fields{"response": response.Body}).Info("Response from serve")
+		logger.WithFields(log.Fields{"response": response.Body}).Info("Response from serve")
+	}
 }
