@@ -9,7 +9,7 @@ opentracing*:::finish
 }
 
 syscall::write:entry
-/this->sc != 0/
+/self->sc != 0/
 {
 	ustack();
 }
