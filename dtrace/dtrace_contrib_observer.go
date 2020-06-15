@@ -6,7 +6,7 @@ import (
 	"reflect"
 	jaeger "github.com/uber/jaeger-client-go"
 	opentracing "github.com/opentracing/opentracing-go"
-	"github.com/jen20/go-usdt"
+	"github.com/gcjenkinson/go-usdt"
 )
 
 const provider = "opentracing"
