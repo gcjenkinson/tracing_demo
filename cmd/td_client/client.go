@@ -15,6 +15,7 @@ import (
 func main() {
 	target := flag.String("target", "localhost:9000", "Target address")
 	srvName:= flag.String("service", "TracingDemo", "Service name")
+	flag.Parse()
 
 	logger := log.WithFields(log.Fields{"service": srvName})
 
@@ -46,6 +47,8 @@ func main() {
 		logger.WithFields(log.Fields{"error": err.Error}).Error("Could not initialize Jaeger tracer")
 		return
 	}
+		
+	logger.WithFields(log.Fields{"target": *target}).Info("Connecting to service")
 
 	conn , err := grpc.Dial(*target, grpc.WithInsecure(),
 		grpc.WithUnaryInterceptor(
