@@ -1,11 +1,11 @@
 package main 
 
 import (
-	"log"
+	"flag"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	opentracing "github.com/opentracing/opentracing-go"
-	ext "github.com/opentracing/opentracing-go/ext"
 	otgrpc "github.com/opentracing-contrib/go-grpc"
 	jaegercfg "github.com/uber/jaeger-client-go/config"
 	jaegerlog "github.com/uber/jaeger-client-go/log"
@@ -13,16 +13,20 @@ import (
 )
 
 func main() {
+	target := flag.String("target", "localhost:9000", "Target address")
+	srvName:= flag.String("service", "TracingDemo", "Service name")
+
+	logger := log.WithFields(log.Fields{"service": srvName})
 
 	cfg, err := jaegercfg.FromEnv()
 	if err != nil {
+
 		// parsing errors might happen here, such as when we get a string where we expect a number
-		log.Printf("Could not parse Jaeger env vars: %s", err.Error())
+		logger.WithFields(log.Fields{"error": err.Error}).Error("Could not parse Jaeger env vars")
 		return
 	}
 
-	cfg.ServiceName = "this-will-be-the-service-name"
-	log.Printf("Service name: %s", cfg.ServiceName);
+	cfg.ServiceName = *srvName
 	jLogger := jaegerlog.StdLogger
 	cfg.Reporter.LogSpans = true
 	cfg.Sampler.Type = "const" 
@@ -31,32 +35,27 @@ func main() {
 	tracer, closer, err:= cfg.NewTracer(jaegercfg.Logger(jLogger))
 	if err != nil {
 
-		log.Printf("Could not initialize jaeger tracer: %s", err.Error())
+		logger.WithFields(log.Fields{"error": err.Error}).Error("Could not initialize jaeger tracer")
 		return
 	}
 	defer closer.Close()
 	
-	sp := opentracing.StartSpan("operation_name")
-	ext.SamplingPriority.Set(sp, 1)
-        sp.Finish()
-
 	opentracing.SetGlobalTracer(tracer)
 	if err != nil {
 
-		log.Printf("Could not initialize Jaeger tracer: %s", err.Error())
+		logger.WithFields(log.Fields{"error": err.Error}).Error("Could not initialize Jaeger tracer")
 		return
 	}
 
-	conn , err := grpc.Dial("128.232.111.221:9000", grpc.WithInsecure(),
+	conn , err := grpc.Dial(*target, grpc.WithInsecure(),
 		grpc.WithUnaryInterceptor(
         		otgrpc.OpenTracingClientInterceptor(tracer)),
     		grpc.WithStreamInterceptor(
         		otgrpc.OpenTracingStreamClientInterceptor(tracer)))
 	if err != nil {
 
-		log.Fatalf("did not connect: %s", err)
+		logger.WithFields(log.Fields{"error": err.Error}).Error("Couldn't connect to service")
 	}
-
 	defer conn.Close()
 
 	c := chat.NewChatServiceClient(conn)
@@ -64,8 +63,8 @@ func main() {
 	response, err := c.SayHello(context.Background(), &chat.Message{Body: "Hello from Client!"})
 	if err != nil {
 
-		log.Fatalf("Error when calling SayHello: %s", err)
+		logger.WithFields(log.Fields{"error": err.Error}).Error("Error when calling SayHello")
 	}
 
-	log.Printf("Response from server: %s", response.Body)
+	logger.WithFields(log.Fields{"response": response.Body}).Info("Response from serve")
 }
