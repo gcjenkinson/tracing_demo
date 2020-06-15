@@ -47,7 +47,7 @@ func main() {
 		return
 	}
 
-	conn , err := grpc.Dial(":9000", grpc.WithInsecure(),
+	conn , err := grpc.Dial("128.232.111.221:9000", grpc.WithInsecure(),
 		grpc.WithUnaryInterceptor(
         		otgrpc.OpenTracingClientInterceptor(tracer)),
     		grpc.WithStreamInterceptor(
