@@ -1,6 +1,7 @@
 opentracing*:::start
 {
 	self->sc = copyinstr(arg1);
+	trace(self->sc);
 }
 
 opentracing*:::finish
