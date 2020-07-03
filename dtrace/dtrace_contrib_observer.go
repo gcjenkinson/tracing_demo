@@ -13,7 +13,7 @@ const provider = "opentracing"
 const module = "jaeger"
 const function = "span"
 const startName = "start"
-const clearName = "clear"
+const finishName = "finish"
 
 type DtraceObserver struct {
 
@@ -54,7 +54,7 @@ func NewDtraceObserver() (*DtraceObserver, io.Closer, error) {
 		return nil, nil, err
 	}
 
-	finishProbe, err := usdt.NewProbe(function, clearName, reflect.String, reflect.String)
+	finishProbe, err := usdt.NewProbe(function, finishName, reflect.String, reflect.String)
 	if err != nil {
 
 		stdlog.Fatalf("NewProbe: %s", err)
