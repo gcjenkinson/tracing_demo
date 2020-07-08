@@ -12,6 +12,11 @@ opentracing*:::finish
 syscall::write:entry
 /self->sc != 0/
 {
-	ustack();
+	trace(self->sc);
 }
 
+syscall::write:return
+/self->sc != 0/
+{
+	trace(self->sc);
+}
